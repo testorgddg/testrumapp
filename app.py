@@ -76,12 +76,12 @@ def trigger_error():
     """Deliberately raise an exception to demonstrate error tracking in Datadog APM."""
     error_type = request.args.get("type", "value")
     if error_type == "value":
-        raise ValueError("This is a deliberate ValueError for testing Datadog error tracking")
+        raise ValueError("This is a new new deliberate ValueError for testing Datadog error tracking")
     elif error_type == "runtime":
-        raise RuntimeError("This is a deliberate RuntimeError for testing Datadog error tracking")
+        raise RuntimeError("This is a new new deliberate RuntimeError for testing Datadog error tracking")
     elif error_type == "zero":
         return jsonify({"result": 1 / 0})
-    raise Exception("Generic test exception for Datadog error tracking")
+    raise Exception("Generic new new test exception for Datadog error tracking")
 
 
 @app.route("/health")
