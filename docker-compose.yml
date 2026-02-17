@@ -1,0 +1,45 @@
+services:
+  app:
+    build: .
+    container_name: test-rum-app
+    ports:
+      - "8080:8080"
+    environment:
+      - DD_AGENT_HOST=datadog-agent
+      - DD_TRACE_AGENT_PORT=8126
+      - DD_SERVICE=test-rum-app
+      - DD_ENV=${DD_ENV:-dev}
+      - DD_VERSION=1.0.0
+      - DD_LOGS_INJECTION=true
+      - DD_TRACE_SAMPLE_RATE=1.0
+      - DD_PROFILING_ENABLED=true
+    depends_on:
+      datadog-agent:
+        condition: service_healthy
+    restart: unless-stopped
+
+  datadog-agent:
+    image: gcr.io/datadoghq/agent:7
+    container_name: datadog-agent
+    ports:
+      - "8126:8126"
+    environment:
+      - DD_API_KEY=${DD_API_KEY:?DD_API_KEY is required. Set it in the .env file.}
+      - DD_SITE=${DD_SITE:-datadoghq.com}
+      - DD_APM_ENABLED=true
+      - DD_APM_NON_LOCAL_TRAFFIC=true
+      - DD_LOGS_ENABLED=true
+      - DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true
+      - DD_PROCESS_AGENT_ENABLED=true
+      - DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /proc/:/host/proc/:ro
+      - /sys/fs/cgroup/:/host/sys/fs/cgroup:ro
+    healthcheck:
+      test: ["CMD-SHELL", "agent health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
